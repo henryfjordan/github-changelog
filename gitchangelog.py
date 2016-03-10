@@ -161,7 +161,9 @@ class GithubChangelog(object):
                 continue
 
             # Skip pull requests from Develop -> Staging -> Master
-            if "->" in pull.title:
+            if "->" in pull.title and (
+                "staging" in pull.title.lower() or
+                "master" in pull.title.lower()):
                 continue
 
             # Add the pull request title to our change log.
