@@ -1,5 +1,9 @@
 # GitHub Changelog Generator
 
+**Note**: The original repo can be found 
+[here](https://github.com/kirsle/github-changelog). This version includes
+some personalization changes that I made for my own usage. 
+
 This is a changelog generator for GitHub pull requests. It works well with the
 [git-flow](http://nvie.com/posts/a-successful-git-branching-model/) workflow
 where you have a `master` branch for production and a `develop` branch for
