@@ -160,6 +160,10 @@ class GithubChangelog(object):
             if type(exclude) is list and pull.base["ref"] in exclude:
                 continue
 
+            # Skip pull requests from Develop -> Staging -> Master
+            if "->" in pull.title:
+                continue
+
             # Add the pull request title to our change log.
             changes.append("* #{} - {} - @{}".format(
                 pull.number, pull.title, pull.user.get("login")
@@ -187,7 +191,7 @@ class GithubChangelog(object):
                 # Scan it for links.
                 for link in self.find_links(comment):
                     label, url = link
-                    if url in urls:
+                    if url in urls or not url.startswith("https://zefrinc.atlassian.net"):
                         continue
 
                     changes.append("  * [{}]({})".format(label, url))
