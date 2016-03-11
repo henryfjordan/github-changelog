@@ -1,2 +1,2 @@
-pygithub3
+pygithub
 six

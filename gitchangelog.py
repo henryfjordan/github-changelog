@@ -13,7 +13,7 @@ import json
 import codecs
 import argparse
 import re
-from pygithub3 import Github
+from github import Github
 
 class GithubChangelog(object):
     MARKDOWN_LINK = re.compile(r'\[(?P<label>.+?)\]\((?P<url>.+?)\)')
@@ -29,13 +29,15 @@ class GithubChangelog(object):
         """Entry point for running this module as an app."""
         self.debug = args.debug
 
+
         # The user's profile directory.
         self.profile = os.path.expanduser("~/.config")
         self.config  = os.path.join(self.profile, "gitchangelog")
 
+        self.repo = args.user+"\\"+args.repo
+
         # Authenticate.
-        self.authenticate(user=args.user, token=args.token, repo=args.repo,
-            reset=args.init)
+        self.authenticate(token=args.token, repo=args.repo, reset=args.init)
 
         # If not using --init, the repo name and start number are required.
         if not args.init:
@@ -46,21 +48,20 @@ class GithubChangelog(object):
         else:
             sys.exit(0)
 
-        self.repo = args.repo
-
         # Scan the pull requests.
         changes = self.scan_pulls(
             start=args.start,
             stop=args.stop,
             after=args.after,
             exclude=args.exclude,
+            repo=self.repo
         )
 
         # Pretty print the result!
         six.print_("\nChanges:\n")
         six.print_("\n".join(changes))
 
-    def authenticate(self, user=None, token=None, repo=None, reset=False):
+    def authenticate(self, token=None, repo=None, reset=False):
         """Handle authentication with the GitHub API."""
         self.say("Authentication begin")
         save = False # Save settings to their config file.
@@ -107,12 +108,18 @@ class GithubChangelog(object):
             self.save_settings(user, token)
             six.print_("Settings saved to {}".format(self.config))
 
-        # Initialize the GitHub API object.
-        self.api = Github(user=user, token=token, repo=repo)
 
-    def scan_pulls(self, start=None, stop=None, after=None, exclude=None):
+        print(token)
+        print(repo)
+
+        # Initialize the GitHub API object.
+        self.api = Github(user_agent=repo, login_or_token=token)
+
+    def scan_pulls(self, start=None, stop=None, after=None, exclude=None, repo=None):
         """Scan closed pull requests starting from #start and optionally
         stopping at #stop."""
+
+        repos = self.api.get_repos(repo)
 
         # Get all closed pull requests.
         pulls = self.api.pull_requests.list(state="closed").all()
